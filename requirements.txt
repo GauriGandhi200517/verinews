@@ -1,0 +1,7 @@
+flask
+requests
+tensorflow
+transformers
+numpy
+python-dotenv
+google-generativeai

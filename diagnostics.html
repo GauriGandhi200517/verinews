@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VeriNews - Diagnostics</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <nav class="nav-extended teal darken-2">
+        <div class="nav-wrapper container">
+            <a href="/" class="brand-logo">
+                <i class="fas fa-newspaper"></i> VeriNews
+            </a>
+            <ul class="right hide-on-med-and-down">
+                <li><a href="/about"><i class="fas fa-info-circle"></i> About</a></li>
+            </ul>
+            <a href="#" data-target="mobile-nav" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+        </div>
+        <div class="nav-content container">
+            <span class="nav-title">Diagnostics</span>
+            <p class="white-text">Troubleshooting information for your analysis</p>
+        </div>
+    </nav>
+
+    <!-- Mobile navigation -->
+    <ul class="sidenav" id="mobile-nav">
+        <li><a href="/"><i class="fas fa-home"></i> Home</a></li>
+        <li><a href="/about"><i class="fas fa-info-circle"></i> About</a></li>
+    </ul>
+
+    <div class="container main-content">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="card-panel {{ 'red lighten-4' if category == 'error' else 'green lighten-4' }}">
+                        <i class="material-icons {{ 'red-text' if category == 'error' else 'green-text' }}">
+                            {{ 'error' if category == 'error' else 'check_circle' }}
+                        </i>
+                        <span>{{ message }}</span>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="row">
+            <div class="col s12">
+                <div class="card">
+                    <div class="card-content">
+                        <span class="card-title">Analysis Diagnostics</span>
+                        <p class="flow-text">Diagnostic information for your last news analysis</p>
+                        
+                        <div class="section">
+                            <h5><i class="fas fa-info-circle"></i> Basic Information</h5>
+                            <table class="striped">
+                                <tbody>
+                                    <tr>
+                                        <th>Time</th>
+                                        <td>{{ diagnostics.get('time', 'Unknown') }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Content Length</th>
+                                        <td>{{ diagnostics.get('content_length', 'Unknown') }} characters</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Gemini Requested</th>
+                                        <td>
+                                            {% if diagnostics.get('gemini_requested', False) %}
+                                                <i class="fas fa-check-circle green-text"></i> Yes
+                                            {% else %}
+                                                <i class="fas fa-times-circle red-text"></i> No
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>Result</th>
+                                        <td>{{ diagnostics.get('predict_result', 'Unknown') }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Confidence</th>
+                                        <td>{{ diagnostics.get('predict_confidence', 'Unknown')|round(3) if diagnostics.get('predict_confidence') else 'Unknown' }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        {% if diagnostics.get('content_enhanced', False) %}
+                        <div class="section">
+                            <h5><i class="fas fa-expand-arrows-alt"></i> Content Enhancement</h5>
+                            <p>The original content was too short, so it was enhanced for better analysis.</p>
+                            <table class="striped">
+                                <tbody>
+                                    <tr>
+                                        <th>Original Length</th>
+                                        <td>{{ diagnostics.get('original_length', 'Unknown') }} characters</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Enhanced Length</th>
+                                        <td>{{ diagnostics.get('enhanced_length', 'Unknown') }} characters</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        {% endif %}
+                        
+                        {% if diagnostics.get('gemini_connection_test', {}) %}
+                        <div class="section">
+                            <h5><i class="fas fa-plug"></i> Gemini API Connection Test</h5>
+                            <div class="card-panel {{ 'green lighten-4' if diagnostics.get('gemini_connection_test', {}).get('success', False) else 'red lighten-4' }}">
+                                <p>
+                                    <strong>Status:</strong> 
+                                    {% if diagnostics.get('gemini_connection_test', {}).get('success', False) %}
+                                        <i class="fas fa-check-circle green-text"></i> Connected
+                                    {% else %}
+                                        <i class="fas fa-times-circle red-text"></i> Failed
+                                    {% endif %}
+                                </p>
+                                <p><strong>Message:</strong> {{ diagnostics.get('gemini_connection_test', {}).get('message', 'Unknown') }}</p>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if diagnostics.get('gemini_error') %}
+                        <div class="section">
+                            <h5><i class="fas fa-exclamation-triangle amber-text"></i> Gemini API Error</h5>
+                            <div class="card-panel amber lighten-4">
+                                <p>{{ diagnostics.get('gemini_error', 'Unknown error') }}</p>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if diagnostics.get('error') %}
+                        <div class="section">
+                            <h5><i class="fas fa-bug red-text"></i> Error Information</h5>
+                            <div class="card-panel red lighten-5">
+                                <p><strong>Error:</strong> {{ diagnostics.get('error', 'Unknown error') }}</p>
+                                {% if diagnostics.get('traceback') %}
+                                    <div class="collapsible-container">
+                                        <a class="btn-flat waves-effect waves-teal" onclick="toggleTraceback()">
+                                            Show/Hide Traceback
+                                        </a>
+                                        <div id="traceback-content" style="display: none;">
+                                            <pre class="error-traceback">{{ diagnostics.get('traceback', '') }}</pre>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                    </div>
+                    <div class="card-action">
+                        <a href="/" class="waves-effect waves-light btn-flat"><i class="fas fa-arrow-left"></i> Back to News</a>
+                        <a href="/test-gemini" target="_blank" class="waves-effect waves-light btn teal right">
+                            <i class="fas fa-vial"></i> Test Gemini API
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col s12">
+                <div class="card">
+                    <div class="card-content">
+                        <span class="card-title">Troubleshooting Tips</span>
+                        
+                        <h5><i class="fas fa-wrench"></i> Common Issues and Solutions</h5>
+                        
+                        <ul class="collapsible">
+                            <li>
+                                <div class="collapsible-header"><i class="fas fa-key"></i> API Key Issues</div>
+                                <div class="collapsible-body">
+                                    <p>Make sure your Gemini API key:</p>
+                                    <ol>
+                                        <li>Is correctly entered in the <code>.env</code> file</li>
+                                        <li>Starts with "AIza" (this is the standard format for Google API keys)</li>
+                                        <li>Has the required permissions for the Gemini Pro model</li>
+                                        <li>Is not surrounded by quotes or extra spaces</li>
+                                    </ol>
+                                    <p>You can get a new Gemini API key from <a href="https://makersuite.google.com/app/apikey" target="_blank">Google AI Studio</a>.</p>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="collapsible-header"><i class="fas fa-signal"></i> Connection Problems</div>
+                                <div class="collapsible-body">
+                                    <p>If you're having connection issues:</p>
+                                    <ol>
+                                        <li>Check your internet connection</li>
+                                        <li>Verify that your network allows connections to Google's AI services</li>
+                                        <li>Some proxies or firewalls may block API connections</li>
+                                        <li>Try restarting the application</li>
+                                    </ol>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="collapsible-header"><i class="fas fa-file-alt"></i> Content Issues</div>
+                                <div class="collapsible-body">
+                                    <p>Problems with the article content:</p>
+                                    <ol>
+                                        <li>Very short articles may not provide enough context for analysis</li>
+                                        <li>Articles exceeding 20,000 characters are truncated</li>
+                                        <li>Content in languages other than English may not be properly analyzed</li>
+                                        <li>Articles with unusual formatting can cause parsing issues</li>
+                                    </ol>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="collapsible-header"><i class="fas fa-tachometer-alt"></i> Rate Limiting</div>
+                                <div class="collapsible-body">
+                                    <p>Gemini API has usage limits:</p>
+                                    <ol>
+                                        <li>Free tier has stricter limits than paid plans</li>
+                                        <li>Wait a few minutes between requests if you see rate limit errors</li>
+                                        <li>Consider upgrading to a paid plan for higher limits</li>
+                                        <li>Check the <a href="https://ai.google.dev/pricing" target="_blank">Google AI pricing</a> page for current limits</li>
+                                    </ol>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="page-footer teal darken-2">
+        <div class="container">
+            <div class="row">
+                <div class="col s12">
+                    <h5 class="white-text">VeriNews: Fake News Detection Project</h5>
+                    <p class="grey-text text-lighten-4">
+                        A project to detect and analyze potentially false information in news articles
+                        using machine learning and AI technologies.
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="footer-copyright">
+            <div class="container">
+                © 2025 VeriNews | Powered by NewsData.io and Gemini AI
+                <a href="https://newsdata.io" target="_blank" class="grey-text text-lighten-4 right">NewsData.io</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize Materialize components
+            M.AutoInit();
+        });
+        
+        function toggleTraceback() {
+            const content = document.getElementById('traceback-content');
+            content.style.display = content.style.display === 'none' ? 'block' : 'none';
+        }
+    </script>
+</body>
+</html>

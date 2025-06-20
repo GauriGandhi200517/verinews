@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VeriNews - Fake News Detection</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <nav class="nav-extended teal darken-2">
+        <div class="nav-wrapper container">
+            <a href="/" class="brand-logo">
+                <i class="fas fa-newspaper"></i> VeriNews
+            </a>
+            <ul class="right hide-on-med-and-down">
+                <li><a href="/about"><i class="fas fa-info-circle"></i> About</a></li>
+            </ul>
+            <a href="#" data-target="mobile-nav" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+        </div>
+        <div class="nav-content container">
+            <span class="nav-title">Fake News Detection System</span>
+            <p class="white-text">Analyze news articles for credibility and misinformation</p>
+        </div>
+    </nav>
+
+    <!-- Mobile navigation -->
+    <ul class="sidenav" id="mobile-nav">
+        <li><a href="/"><i class="fas fa-home"></i> Home</a></li>
+        <li><a href="/about"><i class="fas fa-info-circle"></i> About</a></li>
+    </ul>
+
+    <div class="container main-content">
+        <div class="row">
+            <div class="col s12">
+                <div class="card filter-card">
+                    <div class="card-content">
+                        <span class="card-title">Filter News</span>
+                        <form method="GET" action="/">
+                            <div class="row mb-0">
+                                <div class="input-field col s12 m6 l4">
+                                    <select name="country" id="country-select">
+                                        {% for code, name in countries.items() %}
+                                            <option value="{{ code }}" {% if code == selected_country %}selected{% endif %}>{{ name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <label for="country-select">Country</label>
+                                </div>
+                                <div class="input-field col s12 m6 l4">
+                                    <select name="category" id="category-select">
+                                        <option value="" {% if not selected_category %}selected{% endif %}>All Categories</option>
+                                        {% for code, name in categories.items() %}
+                                            <option value="{{ code }}" {% if code == selected_category %}selected{% endif %}>{{ name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <label for="category-select">Category</label>
+                                </div>
+                                <div class="input-field col s12 l4">
+                                    <input type="text" id="search" name="q" value="{{ search_term }}">
+                                    <label for="search">Search Term (Optional)</label>
+                                </div>
+                            </div>
+                            <button type="submit" class="waves-effect waves-light btn teal"><i class="fas fa-filter"></i> Apply Filters</button>
+                            <a href="/" class="waves-effect waves-light btn-flat">Clear Filters</a>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col s12">
+                <h4>
+                    <i class="fas fa-globe"></i> 
+                    News from {{ countries[selected_country] }} 
+                    {% if selected_category %}
+                        | {{ categories[selected_category] }}
+                    {% endif %}
+                    {% if search_term %}
+                        | Search: "{{ search_term }}"
+                    {% endif %}
+                </h4>
+                <div class="chip api-source">
+                    <i class="fas fa-database"></i>
+                    Powered by NewsData.io
+                </div>
+            </div>
+        </div>
+
+        <div class="row news-container">
+            {% if news|length > 0 %}
+                {% for article in news %}
+                    <div class="col s12 m6 l4">
+                        <div class="card news-card hoverable">
+                            <div class="card-image">
+                                <img src="{{ article.urlToImage }}" alt="{{ article.title }}" onerror="this.src='https://via.placeholder.com/300x200?text=No+Image'">
+                                <span class="card-source">{{ article.source.name if article.source and article.source.name else 'Unknown Source' }}</span>
+                            </div>
+                            <div class="card-content">
+                                <span class="card-title truncate" title="{{ article.title }}">{{ article.title }}</span>
+                                <p class="card-date"><i class="far fa-calendar"></i> {{ article.formatted_date }}</p>
+                                <p class="truncate-3">{{ article.description }}</p>
+                            </div>
+                            <div class="card-action">
+                                <form action="/analyze" method="post">
+                                    <input type="hidden" name="article_title" value="{{ article.title }}">
+                                    <input type="hidden" name="article_content" value="{{ article.content if article.content else article.description }}">
+                                    <input type="hidden" name="article_source" value="{{ article.source.name if article.source and article.source.name else 'Unknown' }}">
+                                    <input type="hidden" name="article_url" value="{{ article.url }}">
+                                    <input type="hidden" name="article_image" value="{{ article.urlToImage }}">
+
+                                    <div class="switch gemini-switch" title="{{ 'Gemini API not configured' if not gemini_available else 'Use Gemini AI for enhanced analysis' }}">
+                                        <label>
+                                            <input type="checkbox" name="use_gemini" {{ 'disabled' if not gemini_available else '' }}>
+                                            <span class="lever"></span>
+                                            Use Gemini AI
+                                        </label>
+                                        {% if not gemini_available %}
+                                            <i class="fas fa-exclamation-circle tooltipped red-text" 
+                                               data-position="top" 
+                                               data-tooltip="Gemini API key not configured"></i>
+                                        {% endif %}
+                                    </div>
+
+                                    <button type="submit" class="waves-effect waves-light btn teal">
+                                        <i class="fas fa-search"></i> Analyze
+                                    </button>
+                                    <a href="{{ article.url }}" target="_blank" class="waves-effect btn-flat right">
+                                        <i class="fas fa-external-link-alt"></i> Source
+                                    </a>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+                
+                <!-- Pagination -->
+                {% if next_page %}
+                <div class="col s12 center-align pagination-container">
+                    <form method="GET" action="/">
+                        <input type="hidden" name="country" value="{{ selected_country }}">
+                        <input type="hidden" name="category" value="{{ selected_category }}">
+                        <input type="hidden" name="q" value="{{ search_term }}">
+                        <input type="hidden" name="page" value="{{ next_page }}">
+                        <button type="submit" class="waves-effect waves-light btn teal">
+                            <i class="fas fa-chevron-right"></i> Load More News
+                        </button>
+                    </form>
+                </div>
+                {% endif %}
+                
+            {% else %}
+                <div class="col s12 center-align">
+                    <div class="card-panel amber lighten-4">
+                        <i class="fas fa-info-circle fa-3x amber-text text-darken-4"></i>
+                        <h5>No News Found</h5>
+                        <p>Try changing your filter criteria or check your internet connection.</p>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <footer class="page-footer teal darken-2">
+        <div class="container">
+            <div class="row">
+                <div class="col s12">
+                    <h5 class="white-text">VeriNews: Fake News Detection Project</h5>
+                    <p class="grey-text text-lighten-4">
+                        A project to detect and analyze potentially false information in news articles
+                        using machine learning and AI technologies.
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="footer-copyright">
+            <div class="container">
+                © 2025 VeriNews | Powered by NewsData.io and Gemini AI
+                <a href="https://newsdata.io" target="_blank" class="grey-text text-lighten-4 right">NewsData.io</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize Materialize components
+            M.AutoInit();
+            
+            // Initialize tooltips
+            var tooltipElems = document.querySelectorAll('.tooltipped');
+            var tooltipInstances = M.Tooltip.init(tooltipElems);
+            
+            // Make cards equal height
+            function equalizeCardHeight() {
+                const cardContents = document.querySelectorAll('.news-card .card-content');
+                let maxHeight = 0;
+                
+                // Reset heights
+                cardContents.forEach(card => {
+                    card.style.height = 'auto';
+                    maxHeight = Math.max(maxHeight, card.offsetHeight);
+                });
+                
+                // Apply equal height
+                cardContents.forEach(card => {
+                    card.style.height = maxHeight + 'px';
+                });
+            }
+            
+            // Run on load and resize
+            window.addEventListener('load', equalizeCardHeight);
+            window.addEventListener('resize', equalizeCardHeight);
+        });
+    </script>
+</body>
+</html>

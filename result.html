@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analysis Result - VeriNews</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <nav class="nav-extended teal darken-2">
+        <div class="nav-wrapper container">
+            <a href="/" class="brand-logo">
+                <i class="fas fa-newspaper"></i> VeriNews
+            </a>
+            <ul class="right">
+                <li><a href="/about"><i class="fas fa-info-circle"></i> About</a></li>
+            </ul>
+        </div>
+        <div class="nav-content container">
+            <span class="nav-title">Analysis Result</span>
+            <p class="white-text">VeriNews credibility assessment</p>
+        </div>
+    </nav>
+
+    <div class="container main-content">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="card-panel {{ 'red lighten-4' if category == 'error' else 'green lighten-4' }}">
+                        <i class="material-icons {{ 'red-text' if category == 'error' else 'green-text' }}">
+                            {{ 'error' if category == 'error' else 'check_circle' }}
+                        </i>
+                        <span>{{ message }}</span>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="row">
+            <!-- Result card -->
+            <div class="col s12 m4">
+                <div class="card {{ animation.class }} hoverable result-card z-depth-2">
+                    <div class="result-header {{ animation.color }}">
+                        <i class="fas {{ animation.icon }} fa-4x white-text pulse"></i>
+                        <h4 class="white-text">{{ result }}</h4>
+                        <p class="white-text lead">Confidence: {{ confidence }}%</p>
+                    </div>
+                    <div class="card-content">
+                        <p class="flow-text">{{ animation.message }}</p>
+                        
+                        <div class="confidence-meter">
+                            <div class="progress">
+                                <div class="determinate {{ animation.color }}" style="width: {{ confidence }}%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="result-details">
+                            <h5>Analysis Details</h5>
+                            <p>VeriNews analyzes news articles using multiple factors including language patterns, source credibility, and content analysis.</p>
+                            
+                            {% if use_gemini %}
+                                <div class="divider"></div>
+                                <div class="section">
+                                    <h5><i class="fas fa-robot"></i> Gemini AI Analysis</h5>
+                                    
+                                    {% if gemini_error %}
+                                        <div class="card-panel amber lighten-4">
+                                            <h6 class="amber-text text-darken-4">
+                                                <i class="fas fa-exclamation-triangle"></i> Gemini Analysis Issue
+                                            </h6>
+                                            <p>There was a problem with the Gemini AI analysis. The local model's analysis was used instead.</p>
+                                            <p>Possible causes:</p>
+                                            <ul class="browser-default">
+                                                <li>API key not set or invalid</li>
+                                                <li>Network connectivity issues</li>
+                                                <li>Content too short for meaningful analysis</li>
+                                                <li>Rate limiting or quota exceeded</li>
+                                            </ul>
+                                            <div class="center-align" style="margin-top: 15px;">
+                                                <a href="/diagnostics" class="waves-effect waves-light btn amber darken-2">
+                                                    <i class="fas fa-stethoscope"></i> View Diagnostics
+                                                </a>
+                                            </div>
+                                        </div>
+                                    {% elif gemini_data %}
+                                        <div class="gemini-analysis">
+                                            <div class="credibility-score">
+                                                <h6>Credibility Score: {{ gemini_data.credibility_score }} / 10</h6>
+                                                <div class="progress">
+                                                    <div class="determinate {{ 'red' if gemini_data.credibility_score < 5 else 'amber' if gemini_data.credibility_score < 7 else 'green' }}" 
+                                                        style="width: {{ gemini_data.credibility_score * 10 }}%"></div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="analysis-section">
+                                                <h6>Reasoning:</h6>
+                                                <p>{{ gemini_data.reasoning }}</p>
+                                            </div>
+                                            
+                                            <div class="analysis-section">
+                                                <h6>Recommendations:</h6>
+                                                <p>{{ gemini_data.recommendations }}</p>
+                                            </div>
+                                            
+                                            {% if gemini_data.parse_method %}
+                                                <div class="chip">
+                                                    <i class="fas fa-code"></i>
+                                                    AI response parsed using: {{ gemini_data.parse_method }}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    {% else %}
+                                        <div class="no-gemini-notice">
+                                            <p>No Gemini AI data available for this analysis.</p>
+                                            <a href="/diagnostics" class="btn-flat waves-effect waves-teal">
+                                                View Diagnostics
+                                            </a>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            {% else %}
+                                <div class="divider"></div>
+                                <div class="section">
+                                    <p class="center-align">
+                                        <i class="fas fa-lightbulb amber-text text-darken-2"></i>
+                                        For more detailed analysis, try using Gemini AI next time.
+                                    </p>
+                                </div>
+                            {% endif %}
+                            
+                        </div>
+                    </div>
+                    <div class="card-action">
+                        <a href="/" class="waves-effect waves-light btn-flat">
+                            <i class="fas fa-arrow-left"></i> Back to News
+                        </a>
+                        {% if article_url %}
+                            <a href="{{ article_url }}" target="_blank" class="waves-effect waves-light btn teal right">
+                                <i class="fas fa-external-link-alt"></i> Original Article
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Article card -->
+            <div class="col s12 m8">
+                <div class="card hoverable article-card">
+                    <div class="card-image">
+                        {% if article_image %}
+                            <img src="{{ article_image }}" alt="{{ article_title }}" onerror="this.src='https://via.placeholder.com/800x400?text=No+Image'">
+                        {% else %}
+                            <img src="https://via.placeholder.com/800x400?text=No+Image" alt="No image available">
+                        {% endif %}
+                        <span class="card-title">{{ article_title }}</span>
+                    </div>
+                    <div class="card-content">
+                        <p class="article-source grey-text">Source: {{ article_source }}</p>
+                        <div class="article-content">
+                            <p>{{ article_content }}</p>
+                        </div>
+                        
+                        <div class="fact-checking-tips">
+                            <h5>Fact-Checking Tips</h5>
+                            <ul class="tips-list">
+                                <li>
+                                    <i class="fas fa-globe"></i>
+                                    <span>Cross-check information with multiple reliable sources</span>
+                                </li>
+                                <li>
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <span>Verify when the article was published to confirm timeliness</span>
+                                </li>
+                                <li>
+                                    <i class="fas fa-user-edit"></i>
+                                    <span>Research the author and publication for credibility</span>
+                                </li>
+                                <li>
+                                    <i class="fas fa-balance-scale"></i>
+                                    <span>Be aware of your own biases when evaluating information</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="page-footer teal darken-2">
+        <div class="container">
+            <div class="row">
+                <div class="col s12">
+                    <h5 class="white-text">VeriNews: Fake News Detection Project</h5>
+                    <p class="grey-text text-lighten-4">
+                        A project to detect and analyze potentially false information in news articles
+                        using machine learning and AI technologies.
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="footer-copyright">
+            <div class="container">
+                © 2025 VeriNews | Powered by NewsData.io and Gemini AI
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            M.AutoInit();
+        });
+    </script>
+</body>
+</html>

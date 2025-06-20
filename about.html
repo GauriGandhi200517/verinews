@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VeriNews - About</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <nav class="nav-extended teal darken-2">
+        <div class="nav-wrapper container">
+            <a href="/" class="brand-logo">
+                <i class="fas fa-newspaper"></i> VeriNews
+            </a>
+            <ul class="right">
+                <li class="active"><a href="/about"><i class="fas fa-info-circle"></i> About</a></li>
+            </ul>
+        </div>
+        <div class="nav-content container">
+            <span class="nav-title">About VeriNews</span>
+            <p class="white-text">Learn how our fake news detection system works</p>
+        </div>
+    </nav>
+
+    <div class="container main-content">
+        <div class="row">
+            <div class="col s12">
+                <div class="card">
+                    <div class="card-content">
+                        <span class="card-title">The VeriNews Project</span>
+                        <p class="flow-text">
+                            VeriNews is an advanced news credibility analysis platform that helps users identify potentially misleading or false information in news articles.
+                        </p>
+                        
+                        <div class="section">
+                            <h5><i class="fas fa-cogs"></i> How It Works</h5>
+                            <p>
+                                VeriNews combines multiple technologies to analyze news articles:
+                            </p>
+                            <ul class="browser-default">
+                                <li>
+                                    <strong>Machine Learning Model:</strong> A pretrained language model that identifies patterns common in reliable vs. unreliable content.
+                                </li>
+                                <li>
+                                    <strong>Google Gemini AI:</strong> Advanced language model that performs detailed content analysis for deeper insights.
+                                </li>
+                                <li>
+                                    <strong>NewsAPI Integration:</strong> Real-time access to news from various countries and categories.
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <div class="section">
+                            <h5><i class="fas fa-bullseye"></i> Our Mission</h5>
+                            <p>
+                                In an era of information overload, VeriNews aims to:
+                            </p>
+                            <ul class="browser-default">
+                                <li>Empower readers with tools to evaluate information credibility</li>
+                                <li>Promote media literacy and critical thinking</li>
+                                <li>Reduce the spread of misinformation</li>
+                                <li>Provide accessible fact-checking resources</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="section">
+                            <h5><i class="fas fa-shield-alt"></i> Limitations</h5>
+                            <p>
+                                While VeriNews uses advanced technology, please be aware of these limitations:
+                            </p>
+                            <ul class="browser-default">
+                                <li>No AI system is 100% accurate in detecting misinformation</li>
+                                <li>Results should be considered as guidance, not absolute truth</li>
+                                <li>The system works best with English language content</li>
+                                <li>Analysis reflects statistical patterns, not human judgment</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="section">
+                            <h5><i class="fas fa-hands-helping"></i> How You Can Help</h5>
+                            <p>
+                                The battle against misinformation requires collective effort:
+                            </p>
+                            <ul class="browser-default">
+                                <li>Always verify information from multiple credible sources</li>
+                                <li>Share our tool with friends and family to promote media literacy</li>
+                                <li>Provide feedback to help us improve</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col s12 m6">
+                <div class="card">
+                    <div class="card-content">
+                        <span class="card-title"><i class="fas fa-lightbulb"></i> Tips for Spotting Fake News</span>
+                        <ul class="fact-check-tips">
+                            <li><strong>Check the source:</strong> Is it a reputable news outlet?</li>
+                            <li><strong>Read beyond headlines:</strong> Headlines can be misleading.</li>
+                            <li><strong>Check the author:</strong> Are they credible with a history of quality reporting?</li>
+                            <li><strong>Supporting sources:</strong> Does the article cite credible sources?</li>
+                            <li><strong>Check the date:</strong> Old news recycled can be misleading.</li>
+                            <li><strong>Is it a joke?:</strong> Satire sites can be confused with news.</li>
+                            <li><strong>Check your biases:</strong> Don't let personal beliefs cloud judgment.</li>
+                            <li><strong>Ask the experts:</strong> Use fact-checking websites like Snopes or FactCheck.org.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col s12 m6">
+                <div class="card">
+                    <div class="card-content">
+                        <span class="card-title"><i class="fas fa-code"></i> Technical Features</span>
+                        <ul class="technical-features">
+                            <li><strong>Multi-Country News Coverage:</strong> Access news from 50+ countries worldwide</li>
+                            <li><strong>AI-Powered Analysis:</strong> Advanced machine learning for content evaluation</li>
+                            <li><strong>Gemini Integration:</strong> Detailed reasoning and recommendations</li>
+                            <li><strong>Category Filtering:</strong> Focus on specific news categories</li>
+                            <li><strong>Search Functionality:</strong> Find specific topics across sources</li>
+                            <li><strong>Visual Confidence Indicators:</strong> Easy-to-understand reliability metrics</li>
+                            <li><strong>Responsive Design:</strong> Works on desktop and mobile devices</li>
+                            <li><strong>Open API:</strong> Integrate with your own applications</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="page-footer teal darken-2">
+        <div class="container">
+            <div class="row">
+                <div class="col s12">
+                    <h5 class="white-text">VeriNews: Fake News Detection Project</h5>
+                    <p class="grey-text text-lighten-4">
+                        A project to detect and analyze potentially false information in news articles
+                        using machine learning and AI technologies.
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="footer-copyright">
+            <div class="container">
+                © 2025 VeriNews | Powered by NewsAPI and Gemini AI
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize Materialize components
+            M.AutoInit();
+        });
+    </script>
+</body>
+</html>
